@@ -1,0 +1,5 @@
+{
+  "name": "Upwork Proposal Generator",
+  "description": "An AI-powered tool that learns from your successful Upwork proposals to generate new, tailored proposals for any job description. Simply upload your past proposals, paste a new job description, and let the AI craft a compelling application for you.",
+  "requestFramePermissions": []
+}
