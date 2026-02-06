@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { generateProposal } from './services/geminiService';
+import FileUploadSection from './components/FileUploadSection';
 import JobInputSection from './components/JobInputSection';
 import ProposalOutputSection from './components/ProposalOutputSection';
 
@@ -324,6 +325,10 @@ Kalaa`
 };
 
 const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [authError, setAuthError] = useState<string>('');
+
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([
     initialProposal, 
     secondInitialProposal, 
@@ -362,8 +367,55 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   }, [uploadedFiles, jobDescription]);
-  
+
+  const handlePasswordSubmit = (event: React.FormEvent) => {
+      event.preventDefault();
+      if (passwordInput === 'asaa') {
+          setIsAuthenticated(true);
+          setAuthError('');
+      } else {
+          setAuthError('Incorrect password. Please try again.');
+          setPasswordInput('');
+      }
+  };
+
   const isGenerateDisabled = uploadedFiles.length === 0 || !jobDescription.trim() || isLoading;
+
+  if (!isAuthenticated) {
+    return (
+        <div className="min-h-screen bg-slate-900 text-slate-200 font-sans flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                <form onSubmit={handlePasswordSubmit} className="bg-slate-800/50 backdrop-blur-sm shadow-lg p-8 rounded-lg">
+                    <h1 className="text-2xl md:text-3xl font-bold text-cyan-400 tracking-tight text-center mb-2">
+                        Access Required
+                    </h1>
+                    <p className="text-slate-400 mt-1 text-center mb-6">Please enter the password to continue.</p>
+                    <div className="mb-4">
+                        <label htmlFor="password-input" className="sr-only">Password</label>
+                        <input
+                            id="password-input"
+                            type="password"
+                            value={passwordInput}
+                            onChange={(e) => setPasswordInput(e.target.value)}
+                            placeholder="Password"
+                            autoFocus
+                            className="w-full bg-slate-900/70 border border-slate-700 rounded-md p-3 text-slate-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors placeholder-slate-500"
+                        />
+                    </div>
+                     {authError && (
+                        <p className="text-red-400 text-center text-sm mb-4">{authError}</p>
+                    )}
+                    <button
+                        type="submit"
+                        className="w-full bg-cyan-500 text-slate-900 font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300 focus:ring-opacity-50"
+                    >
+                        Unlock
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
@@ -381,6 +433,10 @@ const App: React.FC = () => {
       <main className="container mx-auto p-4 md:p-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="flex flex-col gap-8">
+            <FileUploadSection
+                uploadedFiles={uploadedFiles}
+                onFilesChange={setUploadedFiles}
+            />
             <JobInputSection 
               jobDescription={jobDescription} 
               setJobDescription={setJobDescription} 
@@ -405,7 +461,7 @@ const App: React.FC = () => {
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

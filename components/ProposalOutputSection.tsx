@@ -74,7 +74,7 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
 
   return (
     <div className="bg-slate-800 rounded-lg p-6 shadow-md min-h-[360px]">
-      <h2 className="text-xl font-semibold text-slate-100 mb-4">2. Generated Proposal</h2>
+      <h2 className="text-xl font-semibold text-slate-100 mb-4">3. Generated Proposal</h2>
       <div className="bg-slate-900 rounded-md border border-slate-700 min-h-[280px] p-2">
         {renderContent()}
       </div>

@@ -10,7 +10,7 @@ interface JobInputSectionProps {
 const JobInputSection: React.FC<JobInputSectionProps> = ({ jobDescription, setJobDescription, isLoading }) => {
   return (
     <div className="bg-slate-800 rounded-lg p-6 shadow-md">
-      <h2 className="text-xl font-semibold text-slate-100 mb-4">1. Add Job Description</h2>
+      <h2 className="text-xl font-semibold text-slate-100 mb-4">2. Add Job Description</h2>
       <p className="text-slate-400 mb-4 text-sm">Paste the full job description you want to apply for.</p>
       <textarea
         value={jobDescription}
