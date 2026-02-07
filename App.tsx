@@ -1,8 +1,10 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { generateWithGemini, generateWithGroq } from './services/apiService';
 import JobInputSection from './components/JobInputSection';
 import ProposalOutputSection from './components/ProposalOutputSection';
+import { CheckCircleIcon } from './components/icons/CheckCircleIcon';
+import { WarningIcon } from './components/icons/WarningIcon';
 
 interface UploadedFile {
   name: string;
@@ -347,6 +349,17 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [apiProvider, setApiProvider] = useState<ApiProvider>('gemini');
 
+  const [isGeminiConfigured, setIsGeminiConfigured] = useState(false);
+  const [isGroqConfigured, setIsGroqConfigured] = useState(false);
+
+  useEffect(() => {
+    // This check runs once on component mount.
+    // In a real build environment, process.env is static.
+    // In some development setups, this could be more dynamic, but for this context, once is sufficient.
+    setIsGeminiConfigured(!!process.env.API_KEY);
+    setIsGroqConfigured(!!process.env.GROQ_API_KEY);
+  }, []);
+
   const handleGenerateClick = useCallback(async () => {
     if (!jobDescription.trim()) {
       setError('Please provide a job description.');
@@ -386,7 +399,11 @@ const App: React.FC = () => {
       }
   };
 
-  const isGenerateDisabled = !jobDescription.trim() || isLoading;
+  const isCurrentProviderConfigured = () => {
+    return apiProvider === 'gemini' ? isGeminiConfigured : isGroqConfigured;
+  };
+
+  const isGenerateDisabled = !jobDescription.trim() || isLoading || !isCurrentProviderConfigured();
 
   if (!isAuthenticated) {
     return (
@@ -451,33 +468,50 @@ const App: React.FC = () => {
             error={error}
           />
 
-          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col items-center space-y-6">
-            <div>
-                <span className="text-sm font-medium text-gray-600 mr-4">Choose AI Provider:</span>
+          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-4">
+                <span className="text-sm font-medium text-gray-600">Choose AI Provider:</span>
                 <div className="inline-flex rounded-lg shadow-sm">
                     <button
                         onClick={() => setApiProvider('gemini')}
                         disabled={isLoading}
-                        className={`px-4 py-2 text-sm font-semibold border border-gray-300 rounded-l-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 ${
+                        title={isGeminiConfigured ? 'Gemini is configured' : 'Gemini API key is not set'}
+                        className={`px-4 py-2 text-sm font-semibold border border-gray-300 rounded-l-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 flex items-center gap-2 ${
                             apiProvider === 'gemini'
                                 ? 'bg-cyan-500 text-white'
                                 : 'bg-white text-gray-700 hover:bg-gray-50'
                         } disabled:opacity-50`}
                     >
                         Gemini
+                        {isGeminiConfigured ? <CheckCircleIcon /> : <WarningIcon />}
                     </button>
                     <button
                         onClick={() => setApiProvider('groq')}
                         disabled={isLoading}
-                        className={`px-4 py-2 text-sm font-semibold border-t border-b border-r border-gray-300 rounded-r-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 ${
+                        title={isGroqConfigured ? 'Groq is configured' : 'Groq API key is not set'}
+                        className={`px-4 py-2 text-sm font-semibold border-t border-b border-r border-gray-300 rounded-r-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 flex items-center gap-2 ${
                             apiProvider === 'groq'
                                 ? 'bg-cyan-500 text-white'
                                 : 'bg-white text-gray-700 hover:bg-gray-50'
                         } disabled:opacity-50`}
                     >
                         Groq (Fast)
+                        {isGroqConfigured ? <CheckCircleIcon /> : <WarningIcon />}
                     </button>
                 </div>
+            </div>
+
+            <div className="h-10 text-center">
+              {!isCurrentProviderConfigured() && !isLoading && (
+                  <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 text-xs rounded-md px-4 py-2 flex items-center gap-2">
+                      <WarningIcon />
+                      <span>
+                          {apiProvider === 'gemini' ? 'Gemini API key is missing. Add ' : 'Groq API key is missing. Add '}
+                          <code className="bg-yellow-200 p-1 rounded text-xs font-mono">{apiProvider === 'gemini' ? 'API_KEY' : 'GROQ_API_KEY'}</code>
+                          {' to your environment variables.'}
+                      </span>
+                  </div>
+              )}
             </div>
 
             <button
