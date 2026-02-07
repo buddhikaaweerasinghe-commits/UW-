@@ -1,7 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { generateProposal } from './services/geminiService';
-import FileUploadSection from './components/FileUploadSection';
 import JobInputSection from './components/JobInputSection';
 import ProposalOutputSection from './components/ProposalOutputSection';
 
@@ -324,12 +323,7 @@ Thank you for your time.
 Kalaa`
 };
 
-const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [passwordInput, setPasswordInput] = useState<string>('');
-  const [authError, setAuthError] = useState<string>('');
-
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([
+const initialProposals: UploadedFile[] = [
     initialProposal, 
     secondInitialProposal, 
     thirdInitialProposal,
@@ -338,15 +332,21 @@ const App: React.FC = () => {
     sixthInitialProposal,
     seventhInitialProposal,
     eighthInitialProposal
-  ]);
+];
+
+const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [authError, setAuthError] = useState<string>('');
+
   const [jobDescription, setJobDescription] = useState<string>('');
   const [generatedProposal, setGeneratedProposal] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerateClick = useCallback(async () => {
-    if (uploadedFiles.length === 0 || !jobDescription.trim()) {
-      setError('Please upload at least one proposal and provide a job description.');
+    if (!jobDescription.trim()) {
+      setError('Please provide a job description.');
       return;
     }
 
@@ -355,18 +355,17 @@ const App: React.FC = () => {
     setGeneratedProposal('');
 
     try {
-      const proposalContents = uploadedFiles.map(file => file.content);
+      const proposalContents = initialProposals.map(file => file.content);
       const result = await generateProposal(proposalContents, jobDescription);
       setGeneratedProposal(result);
     } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-      // FIX: Updated error message to not mention API key, per coding guidelines.
       setError(`Failed to generate proposal: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
-  }, [uploadedFiles, jobDescription]);
+  }, [jobDescription]);
 
   const handlePasswordSubmit = (event: React.FormEvent) => {
       event.preventDefault();
@@ -379,17 +378,17 @@ const App: React.FC = () => {
       }
   };
 
-  const isGenerateDisabled = uploadedFiles.length === 0 || !jobDescription.trim() || isLoading;
+  const isGenerateDisabled = !jobDescription.trim() || isLoading;
 
   if (!isAuthenticated) {
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-200 font-sans flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-100 font-sans flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <form onSubmit={handlePasswordSubmit} className="bg-slate-800/50 backdrop-blur-sm shadow-lg p-8 rounded-lg">
-                    <h1 className="text-2xl md:text-3xl font-bold text-cyan-400 tracking-tight text-center mb-2">
+                <form onSubmit={handlePasswordSubmit} className="bg-white shadow-lg p-8 rounded-lg border border-gray-200">
+                    <h1 className="text-2xl md:text-3xl font-bold text-cyan-600 tracking-tight text-center mb-2">
                         Access Required
                     </h1>
-                    <p className="text-slate-400 mt-1 text-center mb-6">Please enter the password to continue.</p>
+                    <p className="text-gray-500 mt-1 text-center mb-6">Please enter the password to continue.</p>
                     <div className="mb-4">
                         <label htmlFor="password-input" className="sr-only">Password</label>
                         <input
@@ -399,15 +398,15 @@ const App: React.FC = () => {
                             onChange={(e) => setPasswordInput(e.target.value)}
                             placeholder="Password"
                             autoFocus
-                            className="w-full bg-slate-900/70 border border-slate-700 rounded-md p-3 text-slate-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors placeholder-slate-500"
+                            className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors placeholder-gray-400"
                         />
                     </div>
                      {authError && (
-                        <p className="text-red-400 text-center text-sm mb-4">{authError}</p>
+                        <p className="text-red-500 text-center text-sm mb-4">{authError}</p>
                     )}
                     <button
                         type="submit"
-                        className="w-full bg-cyan-500 text-slate-900 font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300 focus:ring-opacity-50"
+                        className="w-full bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-300 focus:ring-opacity-50"
                     >
                         Unlock
                     </button>
@@ -418,60 +417,52 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
-      <header className="bg-slate-800/50 backdrop-blur-sm shadow-lg p-4 sticky top-0 z-10">
-        <div className="container mx-auto max-w-7xl">
-          <h1 className="text-2xl md:text-3xl font-bold text-cyan-400 tracking-tight">
+    <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-10 border-b border-gray-200">
+        <div className="container mx-auto max-w-4xl">
+          <h1 className="text-2xl md:text-3xl font-bold text-cyan-600 tracking-tight">
             AI Upwork Proposal Generator
           </h1>
-          <p className="text-slate-400 mt-1">
-            Generate tailored proposals by learning from your best work.
+          <p className="text-gray-500 mt-1">
+            Instantly generate tailored proposals from a job description.
           </p>
         </div>
       </header>
 
-      <main className="container mx-auto p-4 md:p-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <div className="flex flex-col gap-8">
-            <FileUploadSection
-                uploadedFiles={uploadedFiles}
-                onFilesChange={setUploadedFiles}
-            />
-            <JobInputSection 
-              jobDescription={jobDescription} 
-              setJobDescription={setJobDescription} 
-              isLoading={isLoading} 
-            />
-          </div>
-          
-          <div className="lg:sticky lg:top-24">
-            <ProposalOutputSection 
-              proposal={generatedProposal}
-              isLoading={isLoading}
-              error={error}
-            />
-          </div>
-        </div>
+      <main className="container mx-auto p-4 md:p-8 max-w-4xl">
+        <div className="flex flex-col gap-8">
+          <JobInputSection 
+            jobDescription={jobDescription} 
+            setJobDescription={setJobDescription} 
+            isLoading={isLoading} 
+          />
+        
+          <ProposalOutputSection 
+            proposal={generatedProposal}
+            isLoading={isLoading}
+            error={error}
+          />
 
-        <div className="mt-8 pt-6 border-t border-slate-700 flex flex-col items-center">
-           <button
-            onClick={handleGenerateClick}
-            disabled={isGenerateDisabled}
-            className="w-full max-w-md bg-cyan-500 text-slate-900 font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out hover:bg-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-300 focus:ring-opacity-50 disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed transform hover:scale-105 disabled:scale-100"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
-              </div>
-            ) : '✨ Generate Proposal'}
-          </button>
-          {error && !isLoading && (
-            <p className="text-red-400 mt-4 text-center">{error}</p>
-          )}
+          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col items-center">
+            <button
+              onClick={handleGenerateClick}
+              disabled={isGenerateDisabled}
+              className="w-full max-w-md bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-300 focus:ring-opacity-50 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed transform hover:scale-105 disabled:scale-100"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </div>
+              ) : '✨ Generate Proposal'}
+            </button>
+            {error && !isLoading && (
+              <p className="text-red-500 mt-4 text-center">{error}</p>
+            )}
+          </div>
         </div>
       </main>
     </div>

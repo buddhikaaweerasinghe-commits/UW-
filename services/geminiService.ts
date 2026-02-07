@@ -43,7 +43,7 @@ Please write a new proposal for this job. Follow these new, specific instruction
 
   try {
     const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-flash-latest',
         contents: prompt,
     });
 

@@ -28,7 +28,7 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-slate-400">
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
           <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-cyan-500 mb-4"></div>
           <p className="text-lg font-semibold">Generating proposal...</p>
           <p className="text-sm">The AI is crafting your application.</p>
@@ -38,7 +38,7 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
 
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-red-400 p-4">
+        <div className="flex flex-col items-center justify-center h-full text-red-500 p-4">
           <p className="font-bold mb-2">Generation Failed</p>
           <p className="text-sm text-center">{error}</p>
         </div>
@@ -47,12 +47,12 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
 
     if (!proposal) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-slate-500">
-           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           <p className="text-lg font-semibold">Your proposal will appear here</p>
-          <p className="text-sm text-center mt-1">Upload your work, add a job description, and click generate.</p>
+          <p className="text-sm text-center mt-1">Add a job description and click generate.</p>
         </div>
       );
     }
@@ -61,11 +61,11 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
       <div className="relative p-1">
         <button
           onClick={handleCopy}
-          className="absolute top-2 right-2 bg-slate-700/80 p-2 rounded-md text-slate-300 hover:bg-slate-600 hover:text-cyan-300 transition-all text-sm"
+          className="absolute top-3 right-3 bg-gray-200/80 p-2 rounded-md text-gray-600 hover:bg-gray-300 hover:text-cyan-600 transition-all text-sm flex items-center gap-1"
         >
           {copied ? 'Copied!' : <><ClipboardIcon /> Copy</>}
         </button>
-        <div className="prose prose-invert prose-p:text-slate-300 prose-headings:text-slate-100 whitespace-pre-wrap p-4 bg-slate-900/70 rounded-md">
+        <div className="prose prose-p:text-gray-700 prose-headings:text-gray-900 whitespace-pre-wrap p-4 bg-gray-50 rounded-md">
             {proposal}
         </div>
       </div>
@@ -73,9 +73,9 @@ const ProposalOutputSection: React.FC<ProposalOutputSectionProps> = ({ proposal,
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg p-6 shadow-md min-h-[360px]">
-      <h2 className="text-xl font-semibold text-slate-100 mb-4">3. Generated Proposal</h2>
-      <div className="bg-slate-900 rounded-md border border-slate-700 min-h-[280px] p-2">
+    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 min-h-[360px]">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Generated Proposal</h2>
+      <div className="bg-gray-100 rounded-md border border-gray-200 min-h-[280px] p-2">
         {renderContent()}
       </div>
     </div>
