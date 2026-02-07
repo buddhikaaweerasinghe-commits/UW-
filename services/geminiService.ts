@@ -1,10 +1,14 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// FIX: Per coding guidelines, assume API_KEY is present and use it directly.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const generateProposal = async (previousProposals: string[], jobDescription: string): Promise<string> => {
+  if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable is not set. Please configure it in your deployment environment.");
+  }
+
+  // Initialize the AI client here, only when the function is called.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   if (previousProposals.length === 0) {
     throw new Error("At least one previous proposal is required.");
   }
@@ -54,6 +58,8 @@ Please write a new proposal for this job. Follow these new, specific instruction
     return response.text;
   } catch (error) {
     console.error("Gemini API call failed:", error);
-    throw new Error("Failed to communicate with the Gemini API. Check console for details.");
+    // Propagate a more generic error to the UI to avoid exposing detailed internal errors.
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
+    throw new Error(`Failed to communicate with the Gemini API. ${message}`);
   }
 };
