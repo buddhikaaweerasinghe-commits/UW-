@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { generateProposal } from './services/geminiService';
+import { generateWithGemini, generateWithGroq } from './services/apiService';
 import JobInputSection from './components/JobInputSection';
 import ProposalOutputSection from './components/ProposalOutputSection';
 
@@ -334,6 +334,8 @@ const initialProposals: UploadedFile[] = [
     eighthInitialProposal
 ];
 
+type ApiProvider = 'gemini' | 'groq';
+
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>('');
@@ -343,6 +345,7 @@ const App: React.FC = () => {
   const [generatedProposal, setGeneratedProposal] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiProvider, setApiProvider] = useState<ApiProvider>('gemini');
 
   const handleGenerateClick = useCallback(async () => {
     if (!jobDescription.trim()) {
@@ -356,7 +359,12 @@ const App: React.FC = () => {
 
     try {
       const proposalContents = initialProposals.map(file => file.content);
-      const result = await generateProposal(proposalContents, jobDescription);
+      let result;
+      if (apiProvider === 'gemini') {
+        result = await generateWithGemini(proposalContents, jobDescription);
+      } else {
+        result = await generateWithGroq(proposalContents, jobDescription);
+      }
       setGeneratedProposal(result);
     } catch (e) {
       console.error(e);
@@ -365,7 +373,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [jobDescription]);
+  }, [jobDescription, apiProvider]);
 
   const handlePasswordSubmit = (event: React.FormEvent) => {
       event.preventDefault();
@@ -443,7 +451,35 @@ const App: React.FC = () => {
             error={error}
           />
 
-          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col items-center">
+          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col items-center space-y-6">
+            <div>
+                <span className="text-sm font-medium text-gray-600 mr-4">Choose AI Provider:</span>
+                <div className="inline-flex rounded-lg shadow-sm">
+                    <button
+                        onClick={() => setApiProvider('gemini')}
+                        disabled={isLoading}
+                        className={`px-4 py-2 text-sm font-semibold border border-gray-300 rounded-l-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 ${
+                            apiProvider === 'gemini'
+                                ? 'bg-cyan-500 text-white'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                        } disabled:opacity-50`}
+                    >
+                        Gemini
+                    </button>
+                    <button
+                        onClick={() => setApiProvider('groq')}
+                        disabled={isLoading}
+                        className={`px-4 py-2 text-sm font-semibold border-t border-b border-r border-gray-300 rounded-r-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 ${
+                            apiProvider === 'groq'
+                                ? 'bg-cyan-500 text-white'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                        } disabled:opacity-50`}
+                    >
+                        Groq (Fast)
+                    </button>
+                </div>
+            </div>
+
             <button
               onClick={handleGenerateClick}
               disabled={isGenerateDisabled}
